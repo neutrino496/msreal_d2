@@ -115,6 +115,10 @@ ssize_t storage_read(struct file *pfile, char __user *buffer, size_t length, lof
 		return 0;
 	}
 	
+	if(down_interruptible(&sem))
+		return -ERESTARTSYS;
+
+	
 	sort(s);
 	ret = copy_to_user(buffer, buff1, len);
 	ret = copy_to_user(buffer, buff2, len);
@@ -129,6 +133,7 @@ ssize_t storage_read(struct file *pfile, char __user *buffer, size_t length, lof
 				printk(KERN_INFO "%s %s EE%d_2020 = %d \n", s[i-1].name, s[i-1].surname, s[i-1].index, s[i-1].points);
 		}
 	}
+	up(&sem);
 	return len;
 }
 
@@ -146,7 +151,7 @@ ssize_t storage_write(struct file *pfile, const char __user *buffer, size_t leng
 				strcpy(s[i].surname, " ");
 				s[i].index=0;
 				s[i].points=0;			
-			printk(KERN_INFO "Succesfully deleted value from position\n",i);
+				printk(KERN_INFO "Succesfully deleted value from position\n");
 			}			
 		}	
 	}
@@ -160,7 +165,7 @@ ssize_t storage_write(struct file *pfile, const char __user *buffer, size_t leng
 	buff2[length-1] = '\0';
 
 // semafor
-	/*if(down_interruptible(&sem))
+	if(down_interruptible(&sem))
 		return -ERESTARTSYS;
 	while(position == 10)
 	{
@@ -169,9 +174,9 @@ ssize_t storage_write(struct file *pfile, const char __user *buffer, size_t leng
 			return -ERESTARTSYS;
 		if(down_interruptible(&sem))
 			return -ERESTARTSYS;
-	}*/
-	format1 = sscanf(buff1,"%s %s EE%d_2020 = %d",ime1, prezime1, &br_ind1, &bodovi);
-	format2 = sscanf(buff2,"izbrisi = %s %s %d",ime2, prezime2, &br_ind2);
+	}
+	format1 = sscanf(buff1,"%s %s EE%d_2020 = %d \n",ime1, prezime1, &br_ind1, &bodovi);
+	format2 = sscanf(buff2,"izbrisi = %s %s %d \n",ime2, prezime2, &br_ind2);
 	// ako unesem 4 parametra - format1 = 4, format2 =0, za izbrisi - format1=format2 = 2
 	//printk(KERN_INFO "format1 = %d format2 = %d\n", format1, format2);
 	if(format1 == 4)
@@ -185,29 +190,28 @@ ssize_t storage_write(struct file *pfile, const char __user *buffer, size_t leng
 			if(provera(pom,s))
 			{
 				s[provera(pom,s)-1].points=bodovi;
-                printk(KERN_INFO "Succesfully changed value in position %d \n", (provera(pom,s)-1));
+                printk(KERN_INFO "Succesfully changed value in position\n");
 			} else 
 			{
 				strcpy(s[position].name, ime1);
 				strcpy(s[position].surname, prezime1);
 				s[position].index = br_ind1;
 				s[position].points = bodovi;
-				printk(KERN_INFO "Succesfully wrote value into position %d \n", position); 
-				printk(KERN_INFO "%s %s EE%d_2020 = %d  ", s[position].name, s[position].surname, s[position].index, s[position].points);
+				printk(KERN_INFO "Succesfully wrote value into position\n"); 
+				printk(KERN_INFO "%s %s EE%d_2020 = %d \n", s[position].name, s[position].surname, s[position].index, s[position].points);
                 position++;
 			}
 		}else 
 			printk(KERN_WARNING "Storage is full\n"); 
-	} else 
+	} 
+	else if(format2 == 3)
+		delete(s,ime2,prezime2, br_ind2);
+	else
 		printk(KERN_WARNING "Wrong command format");
 	
-	if(format2 == 3)
-	{
-		delete(s,ime2,prezime2, br_ind2);
-	}
 
-	/*up(&sem);
-	wake_up_interruptible(&readQ);*/
+	up(&sem);
+	wake_up_interruptible(&readQ);
 
 	return length;
 }
