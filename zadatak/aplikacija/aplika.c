@@ -18,91 +18,82 @@ void ucitaj_studenta(FILE *fp, struct storage s[], int *n) {
 	}
 }
 
-int izmena(int n, struct storage s[]){
-	fp = fopen ("/dev/storage", "a+");
+int izmena(char name[], char surname[], int br_ind, int bodovi)
+{
+	fp = fopen ("/dev/storage", "a");
 	if(fp==NULL)
 	{
 		puts("Problem pri otvaranju /dev/storage");
 		return -1;
 	}
-	//int n;
-	int br_ind, bodovi;
-
-	ucitaj_studenta(fp, s, &n);
-	fclose(fp);
-	fp = fopen ("/dev/storage", "w");
-	fclose(fp);
-	printf("unesi broj indeksa studenta cije bodove zelis da promenis: ");
+	printf("ime studenta:\n");
+	scanf("%s",name);
+	printf("prezime studenta:\n");
+	scanf("%s",surname);
+	printf("broj indeksa studenta:\n");
 	scanf("%d",&br_ind);
-	printf("unesi novi broj bodova: ");
+	printf("novi broj bodova studenta:\n");
 	scanf("%d",&bodovi);
-	fp = fopen ("/dev/storage", "a");
-	for(int i = 0; i<n; i++){
-		if(br_ind == s[i].index){
-			s[i].points = bodovi;
-		}
-		fprintf(fp, "%s %s EE%d_2020 = %d\n",s[i].name,s[i].surname,s[i].index,s[i].points);
-	}
+	fprintf(fp, "%s %s EE%d_2020 = %d\n",name,surname,br_ind,bodovi);
 	fclose(fp);
+	/*if(fclose(fp))
+	{
+		puts("Problem pri zatvaranju /dev/storage");
+		return -1;
+	}*/
 }
 
-
-int unos_novog_studenta(int n, struct storage s[]){
+void unos_novog_studenta(char name[], char surname[], int br_ind, int bodovi)
+{
 	fp = fopen ("/dev/storage", "a");
 	if(fp==NULL)
 	{
 		puts("Problem pri otvaranju /dev/storage");
 		return -1;
 	}
-	for(int i=0; i<n; i++) {
-		printf("ime:\n");
-		scanf("%s",s[i].name);
-		printf("prezime:\n");
-		scanf("%s",s[i].surname);
-		printf("broj indeksa:\n");
-		scanf("%d",&s[i].index);
-		printf("broj bodova:\n");
-		scanf("%d",&s[i].points);
-		fprintf(fp,"%s %s EE%d_2020 = %d\n",s[i].name,s[i].surname,s[i].index,s[i].points);
-	}
-	if(fclose(fp))
-	{
-			puts("Problem pri zatvaranju /dev/storage");
-			return -1;
-	}
-}
-
-int brisanje(int n, struct storage s[]){
-	int br_ind;
-	fp = fopen ("/dev/storage", "a+");
-	if(fp==NULL)
-	{
-		puts("Problem pri otvaranju /dev/storage");
-		return -1;
-	}
-	ucitaj_studenta(fp, s, &n);
-	fclose(fp);
-	fp = fopen ("/dev/storage", "w");
-	fclose(fp);
-	printf(" unesi broj indeksa studenta kog zelis da obrises:\n");
+	printf("ime studenta:\n");
+	scanf("%s",name);
+	printf("prezime studenta:\n");
+	scanf("%s",surname);
+	printf("broj indeksa studenta:\n");
 	scanf("%d",&br_ind);
-	fp = fopen ("/dev/storage", "a");
-	for(int i = 0; i<n; i++){
-		if(br_ind == s[i].index){
-			strcpy(s[i].name, " ");
-			strcpy(s[i].surname, " ");
-			s[i].index = 0;
-			s[i].points = 0;
-		}
-		if( strcmp(s[i].name, " ") &&
-			strcmp(s[i].surname, " ") &&
-			s[i].index != 0 )
-		fprintf(fp, "%s %s EE%d_2020 = %d\n",s[i].name,s[i].surname,s[i].index,s[i].points);
-	}
+	printf("broj bodova studenta:\n");
+	scanf("%d",&bodovi);
+	fprintf(fp, "%s %s EE%d_2020 = %d\n",name,surname,br_ind,bodovi);
 	fclose(fp);
+	/*if(fclose(fp))
+	{
+		puts("Problem pri zatvaranju /dev/storage");
+		return -1;
+	}*/
 }
 
-int citanje(int n, struct storage s[]){
+void brisanje(char name[],char surname[],int br_ind)
+{
+	fp = fopen ("/dev/storage", "a");
+	if(fp==NULL)
+	{
+		puts("Problem pri otvaranju /dev/storage");
+		return -1;
+	}
+	printf("unesi ime studenta kog zelis da obrises:\n");
+	scanf("%s",name);
+	printf("unesi prezime studenta kog zelis da obrises:\n");
+	scanf("%s",surname);
+	printf("unesi broj indeksa studenta kog zelis da obrises:\n");
+	scanf("%d",&br_ind);
+	fprintf(fp, "izbrisi = %s %s %d \n",name,surname,br_ind);
+	fclose(fp);
+	/*if(fclose(fp))
+	{
+		puts("Problem pri zatvaranju /dev/storage");
+		return -1;
+	}*/
+}
+
+int citanje(int n, struct storage s[])
+{
+	int i;
 	fp = fopen ("/dev/storage", "a+");
 	if(fp==NULL)
 	{
@@ -110,17 +101,21 @@ int citanje(int n, struct storage s[]){
 		return -1;
 	}
 	ucitaj_studenta(fp, s, &n);
-	for(int i=0; i<n; i++){
-		if( s[i].name != " " &&
-			s[i].surname != " " &&
-			s[i].index != 0 &&
-			s[i].points != 0)
+	for(i=0;i<n;i++)
 		printf("%s %s EE%d_2020 = %d\n", s[i].name, s[i].surname, s[i].index, s[i].points);
-	}
 	fclose(fp);
+	/*if(fclose(fp))
+	{
+		puts("Problem pri zatvaranju /dev/storage");
+		return -1;
+	}*/
 }
 
 int main () {
+    char ime[11];
+    char prezime[11];
+    int indeks;
+    int br_bodova;
 	int end=0;        
 	int pom;
 	int n=10;
@@ -140,16 +135,16 @@ int main () {
 		while(pom>5 && pom<1);
 		switch(pom){
 		case 1:
-			unos_novog_studenta(1, s);
+			unos_novog_studenta(ime,prezime,indeks,br_bodova);
 			break;
 		case 2:
-			izmena(n, s);
+		    izmena(ime,prezime,indeks, br_bodova);
 			break;
 		case 3:
-			brisanje(n, s);
+			brisanje(ime,prezime,indeks);
 			break;
 		case 4:
-			citanje(n, s);
+			citanje(n,s);
 			break;
 		case 5:
 			end=1;
